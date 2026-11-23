@@ -1,0 +1,271 @@
+{
+  "algorithm_name": "FOVEA-DR",
+  "expanded_name": "Field-of-View-Aware Lesion-Evidence Reasoning Network for Diabetic Retinopathy",
+  "status": "CANDIDATE_COMPUTATIONALLY_AMENDED_BEFORE_TRAINING",
+  "novelty_claim_status": "PROVISIONAL_PENDING_SYSTEMATIC_PRIOR_ART_REVIEW",
+  "intended_primary_claim": "Joint field-of-view-aware retinal evidence modeling, lesion-level counterfactual intervention, and differentiable clinical-state ordinal reasoning for DR grading across CFP and UWF.",
+  "not_claimed_as_novel_individually": [
+    "EfficientNetV2 backbone",
+    "lesion attention alone",
+    "ordinal loss alone",
+    "temperature scaling alone",
+    "multi-task learning alone",
+    "uncertainty estimation alone"
+  ],
+  "tasks": {
+    "primary": {
+      "modalities": [
+        "CFP",
+        "UWF"
+      ],
+      "target": "five_class_DR_grade",
+      "classes": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "lesion_auxiliary": {
+      "modalities": [
+        "CFP",
+        "UWF"
+      ],
+      "targets": [
+        "microaneurysm",
+        "hard_exudate",
+        "intraretinal_hemorrhage",
+        "VB_IRMA",
+        "neovascularization",
+        "vitreous_hemorrhage",
+        "retinal_detachment"
+      ],
+      "annotation_level": "image_level_binary"
+    },
+    "OCT_auxiliary": {
+      "modality": "OCT",
+      "target": "three_class_DME_grade",
+      "classes": [
+        0,
+        1,
+        2
+      ],
+      "paired_patient_fusion": false,
+      "claim": "unpaired_auxiliary_retinal_representation_learning"
+    }
+  },
+  "architecture": {
+    "encoder": {
+      "backbone": "EfficientNetV2-S",
+      "initialization": "official_torchvision_ImageNet1K_V1",
+      "input": "512x512_RGB",
+      "multi_scale_feature_pyramid": true,
+      "backbone_is_the_novelty": false
+    },
+    "FOV_aware_coordinate_encoder": {
+      "applies_to": [
+        "CFP",
+        "UWF"
+      ],
+      "coordinate_channels": [
+        "normalized_x",
+        "normalized_y",
+        "retinal_radius",
+        "sin_retinal_angle",
+        "cos_retinal_angle",
+        "visible_retinal_field_mask",
+        "modality_indicator"
+      ],
+      "retinal_zones": [
+        "central",
+        "mid_peripheral",
+        "far_peripheral"
+      ],
+      "purpose": "Represent lesion location relative to the visible retinal field without treating unobserved CFP periphery as normal."
+    },
+    "lesion_evidence_bank": {
+      "number_of_queries": 7,
+      "query_type": "learnable_lesion_specific_queries",
+      "feature_source": "multi_scale_encoder_features_plus_FOV_coordinates",
+      "outputs_per_lesion": [
+        "presence_logit",
+        "weakly_supervised_spatial_evidence_map",
+        "top_k_spatial_burden",
+        "lesion_evidence_embedding",
+        "lesion_evidence_entropy"
+      ],
+      "pixel_level_masks_required": false
+    },
+    "differentiable_clinical_state_reasoner": {
+      "abbreviation": "DCSR",
+      "input": "seven_lesion_evidence_vectors_and_spatial_burdens",
+      "soft_states": {
+        "S0": "no_supported_DR_lesion_state",
+        "S1": "microaneurysm_predominant_state",
+        "S2": "moderate_nonproliferative_lesion_state",
+        "S3": "high_burden_or_VB_IRMA_state",
+        "S4": "proliferative_NV_VH_RD_state"
+      },
+      "constraints": [
+        "nonnegative_lesion_to_severity_weights_via_softplus",
+        "ordered_grade_thresholds_via_cumulative_softplus",
+        "soft_not_rigid_clinical_rules",
+        "discordant_source_labels_handled_by_existing_QC_masks"
+      ],
+      "output": "five_class_clinical_grade_distribution"
+    },
+    "global_latent_ordinal_route": {
+      "input": "global_encoder_representation",
+      "output": "five_class_ordinal_grade_distribution",
+      "purpose": "retain image evidence not captured by image-level lesion labels"
+    },
+    "evidence_reliability_gate": {
+      "inputs": [
+        "clinical_route_entropy",
+        "latent_route_entropy",
+        "route_Jensen_Shannon_disagreement",
+        "lesion_evidence_entropy",
+        "modality_embedding",
+        "image_quality_proxy"
+      ],
+      "output": "clinical_route_mixture_weight_g",
+      "final_distribution": "g*P_clinical+(1-g)*P_latent",
+      "uncertainty_outputs": [
+        "final_predictive_entropy",
+        "route_disagreement",
+        "lesion_evidence_uncertainty"
+      ]
+    },
+    "OCT_branch": {
+      "head": "three_class_ordinal_DME_head",
+      "direct_input_to_fundus_DR_decision": false,
+      "patient_level_fusion": false,
+      "evaluation": "separate_DME_endpoint_and_ablation_of_auxiliary_transfer"
+    }
+  },
+  "lesion_counterfactual_intervention": {
+    "abbreviation": "LCI",
+    "space": "lesion_evidence_vectors_not_pixel_generation",
+    "interventions": [
+      {
+        "name": "lesion_deletion",
+        "operation": "set_one_lesion_evidence_to_absent",
+        "constraint": "expected_DR_severity_must_not_increase"
+      },
+      {
+        "name": "PDR_evidence_amplification",
+        "lesions": [
+          "neovascularization",
+          "vitreous_hemorrhage",
+          "retinal_detachment"
+        ],
+        "operation": "increase_selected_PDR_evidence",
+        "constraint": "expected_DR_severity_must_not_decrease"
+      },
+      {
+        "name": "MA_only_transition",
+        "operation": "retain_MA_and_remove_other_lesion_evidence",
+        "constraint": "clinical_route_should_prefer_low_nonzero_DR_state"
+      }
+    ],
+    "loss_name": "lesion_counterfactual_intervention_loss",
+    "purpose": "Test and train directional dependence of predicted grade on explicit pathological evidence."
+  },
+  "candidate_loss": {
+    "fundus_grade_cross_entropy_weight": 1.0,
+    "fundus_ordinal_EMD_weight": 0.5,
+    "lesion_BCE_weight": 0.5,
+    "clinical_state_alignment_weight": 0.2,
+    "lesion_counterfactual_intervention_weight": 0.1,
+    "masked_route_agreement_weight": 0.05,
+    "OCT_DME_task_weight": 0.5,
+    "mask_policies": {
+      "lesion_BCE": "lesion_loss_mask",
+      "clinical_state_alignment": "lesion_sensitivity_mask",
+      "route_agreement": "lesion_sensitivity_mask",
+      "OCT_lesion_supervision": false
+    }
+  },
+  "required_ablation_sequence": [
+    "E0_EfficientNetV2S_CE",
+    "E1_plus_ordinal",
+    "E2_plus_lesion_evidence_bank",
+    "E3_plus_FOV_coordinate_encoder",
+    "E4_plus_DCSR",
+    "E5_plus_LCI",
+    "E6_plus_reliability_gate",
+    "FOVEA_DR_FULL_FUNDUS",
+    "FOVEA_DR_FULL_plus_OCT_auxiliary"
+  ],
+  "comparators": {
+    "general_models": [
+      "ResNet50",
+      "EfficientNetV2-S",
+      "ConvNeXt-Tiny",
+      "Swin-T",
+      "ViT-B_16"
+    ],
+    "ophthalmic_or_DR_specific_subject_to_reproducibility": [
+      "RETFound",
+      "MMNet",
+      "CauDR",
+      "LoASP",
+      "Dual-SwinOrd"
+    ],
+    "fair_comparison_requirement": "same_cleaned_frozen_split_and_primary_metrics"
+  },
+  "novel_evaluation_endpoints": [
+    "CFP_QWK",
+    "UWF_QWK",
+    "mean_CFP_UWF_QWK",
+    "CFP_to_UWF_performance_gap",
+    "lesion_macro_AUROC",
+    "referable_DR_sensitivity",
+    "expected_calibration_error",
+    "Brier_score",
+    "counterfactual_monotonicity_violation_rate",
+    "lesion_deletion_faithfulness",
+    "clinical_latent_route_disagreement_error_association",
+    "external_UWF_QWK"
+  ],
+  "external_test_policy": "remain_unaccessed_until_algorithm_model_and_calibration_freeze",
+  "reproducibility": {
+    "development_seed": 20260806,
+    "final_FOVEA_seeds": [
+      2026,
+      2027,
+      2028
+    ],
+    "ablation_initial_seed": 20260806,
+    "candidate_must_pass_before_freeze": [
+      "tensor_shape_unit_tests",
+      "finite_forward_test",
+      "finite_backward_test",
+      "counterfactual_direction_unit_tests",
+      "ordered_threshold_unit_test",
+      "modality_mask_unit_test",
+      "CPU_memory_feasibility_test"
+    ]
+  },
+  "computational_amendments": [
+    {
+      "amendment_id": "0G-4B-R2",
+      "reason": "Reasoner-only counterfactual loss is vacuous because the nested reasoner is monotonic by construction.",
+      "previous_target": "CLINICAL_REASONER_EXPECTED_GRADE",
+      "corrected_target": "FINAL_EVIDENCE_LATENT_FUSED_GRADE_DISTRIBUTION",
+      "interventions": [
+        "REMOVE_ALL_LESION_EVIDENCE",
+        "REMOVE_PDR_SPECIFIC_EVIDENCE",
+        "ADD_PDR_SPECIFIC_EVIDENCE"
+      ],
+      "recompute_reliability_gate_after_each_intervention": true,
+      "effect_margin": 0.25,
+      "candidate_loss_weight": 0.1,
+      "computational_non_vacuity_test": "PASS",
+      "source_candidate_modified": false,
+      "training_started": false
+    }
+  ],
+  "candidate_version": "1.1"
+}

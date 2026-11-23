@@ -1,0 +1,103 @@
+{
+  "protocol_id": "MMRDR_FOVEA_DR_REVIEWER_EXPERIMENTS_V1",
+  "status": "FROZEN_BEFORE_REVIEWER_EXPERIMENTS",
+  "freeze_date_utc": "2026-10-30",
+  "source_sha256": "233938d7126ee0084851d0a55c8f963eb1234d97b3b557910df5da2beb09d725",
+  "frozen_parents": {
+    "development_split_sha256": "8263a3ade3317d1c77ceeadaee0df1c8d245bd30fa7d472c47d2e53914714140",
+    "validation_manifest_sha256": "d94c5613b6d030dd6e99246b1b72f77746b5223139a4597bef733eb38a5786af",
+    "production_model_source_sha256": "228ce4ef9389d98a184d53f82c797f172907f27fa3a8702387eb5afc43be2cc9",
+    "selected_full_model_checkpoint_sha256": "89f5e87b647680a9094c55bf647dc1dd2abb624681e733ffb453e30e4c11ff1f",
+    "baseline_selection_contract_sha256": "505e7cb52155e0c8656a81c57754e890dff81d4b53e9ada8920de999fd11239d",
+    "selected_epoch": 10,
+    "run_seed": 2026
+  },
+  "data_access_policy": {
+    "TRAIN": "ALLOWED_FOR_PRESPECIFIED_RETRAINING_EXPERIMENTS_ONLY",
+    "VALIDATION": "ALLOWED_FOR_SELECTION_AND_MECHANISTIC_CHARACTERIZATION",
+    "CALIBRATION": "PROHIBITED_FOR_STAGE_E1; ALLOWED_ONLY_AFTER_MODEL_SELECTION_IN_LATER_STAGES",
+    "LOCKED_INTERNAL_TEST": "PROHIBITED_FOR_ALL_REVIEWER-REQUESTED DEVELOPMENT EXPERIMENTS",
+    "EXTERNAL_DATA": "ALLOWED_ONLY_AFTER_MODEL_AND_MAPPING_FREEZE"
+  },
+  "experiments_in_locked_order": [
+    {
+      "id": "E1_VALIDATION_MECHANISTIC_AUDIT",
+      "purpose": "Quantify reliability-gate behavior, lesion-evidence maps, and counterfactual directional consistency",
+      "partition": "VALIDATION_ONLY",
+      "parameter_updates": false,
+      "primary_outputs": [
+        "per-image gate and route-disagreement table",
+        "counterfactual direction and margin-satisfaction rates",
+        "predeclared qualitative lesion-evidence panels"
+      ],
+      "checkpoint_identity_rule": {
+        "metrics": [
+          "CFP_QWK",
+          "UWF_QWK",
+          "mean_fundus_QWK",
+          "CFP_NLL",
+          "UWF_NLL",
+          "mean_fundus_NLL"
+        ],
+        "absolute_tolerance": 0.0001
+      },
+      "selection_rules": [
+        "highest route disagreement among correct predictions per fundus modality",
+        "highest route disagreement among incorrect predictions per fundus modality",
+        "highest and lowest clinical-route gate per fundus modality",
+        "largest add-PDR and remove-PDR expected-grade shifts per fundus modality"
+      ]
+    },
+    {
+      "id": "E2_COMPONENT_ABLATIONS",
+      "variants": [
+        "NO_FIELD_OF_VIEW_ENCODING",
+        "NO_LESION_QUERIES_GLOBAL_POOLED_EVIDENCE",
+        "NO_CLINICAL_REASONER_LATENT_ONLY_GRADE"
+      ],
+      "partitions": [
+        "TRAIN",
+        "VALIDATION"
+      ],
+      "locked_test": false
+    },
+    {
+      "id": "E3_MULTI_SEED_ROBUSTNESS",
+      "configurations": [
+        "FOVEA_DR_FULL",
+        "B1",
+        "A1",
+        "A3"
+      ],
+      "seeds": [
+        2026,
+        3407,
+        7919
+      ],
+      "reporting": "per-seed values plus mean and standard deviation; no p-value claim from n=3",
+      "locked_test": false
+    },
+    {
+      "id": "E4_RETINAL_FOUNDATION_BASELINE",
+      "minimum_requirement": "one officially released retinal foundation encoder trained under the same frozen TRAIN/VALIDATION protocol",
+      "locked_test": false
+    },
+    {
+      "id": "E5_EXTERNAL_CFP_VALIDATION",
+      "minimum_requirement": "externally sourced five-class CFP cohort with mapping frozen before inference",
+      "internal_locked_test": false
+    }
+  ],
+  "primary_metrics": [
+    "mean_CFP_UWF_QWK",
+    "mean_CFP_UWF_NLL"
+  ],
+  "secondary_metrics": [
+    "modality_QWK",
+    "macro_F1",
+    "macro_ROC_AUC",
+    "ECE",
+    "Brier"
+  ],
+  "claim_policy": "No universal-superiority, causal-component, localization-accuracy, or deployment claim without the corresponding experiment"
+}

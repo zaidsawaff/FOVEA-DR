@@ -1,0 +1,84 @@
+{
+  "bootstrap": {
+    "interval": "pointwise 95% percentile",
+    "replicates": 5000,
+    "stratification": "referable truth >=2",
+    "unit": "image"
+  },
+  "internal_locked_test_opened": false,
+  "limitations": [
+    "CFP only; one external cohort and one training seed.",
+    "Image-level intervals do not account for unidentified within-patient dependence.",
+    "Historical ImageNet initialization is documented; complete upstream photo-level disjointness is unverified.",
+    "Fixed thresholds do not guarantee matched sensitivity or 95% sensitivity on IDRiD."
+  ],
+  "metrics": {
+    "B1_PLAIN_EFFICIENTNETV2S_MULTITASK": {
+      "AUROC": 0.9530798605346171,
+      "FN": 9,
+      "FP": 64,
+      "NLL": 1.2090281308268713,
+      "QWK": 0.8011381621502593,
+      "TN": 126,
+      "TP": 308,
+      "sensitivity": 0.9716088328075709,
+      "specificity": 0.6631578947368421
+    },
+    "B3_CONVNEXT_TINY_MULTITASK": {
+      "AUROC": 0.9415075543748962,
+      "FN": 12,
+      "FP": 57,
+      "NLL": 1.0963692504436315,
+      "QWK": 0.7831962708641826,
+      "TN": 133,
+      "TP": 305,
+      "sensitivity": 0.9621451104100947,
+      "specificity": 0.7
+    },
+    "FOVEA_DR_FULL": {
+      "AUROC": 0.9391499252864022,
+      "FN": 8,
+      "FP": 54,
+      "NLL": 1.2266404128714632,
+      "QWK": 0.7622052615870037,
+      "TN": 136,
+      "TP": 309,
+      "sensitivity": 0.9747634069400631,
+      "specificity": 0.7157894736842105
+    }
+  },
+  "n_images": 507,
+  "nll_clipping": 1e-07,
+  "paired_full_minus_comparator": {
+    "B1_PLAIN_EFFICIENTNETV2S_MULTITASK": {
+      "sensitivity_diff": 0.003154574132492205,
+      "sensitivity_diff_CI95": [
+        -0.009463722397476393,
+        0.018927444794952675
+      ],
+      "specificity_diff": 0.052631578947368474,
+      "specificity_diff_CI95": [
+        0.0052631578947368585,
+        0.09999999999999998
+      ]
+    },
+    "B3_CONVNEXT_TINY_MULTITASK": {
+      "sensitivity_diff": 0.012618296529968487,
+      "sensitivity_diff_CI95": [
+        0.0,
+        0.028391167192429068
+      ],
+      "specificity_diff": 0.015789473684210575,
+      "specificity_diff_CI95": [
+        -0.026315789473684237,
+        0.06315789473684211
+      ]
+    }
+  },
+  "parameter_updates": false,
+  "predictions_sha256": "f78ff964a87b09424e8886b3dd7d4c9b1288206cd34840ad07878f33c0a7dc21",
+  "run_signature": "dfe1183482021b6d8efe899851ca3834260bcb8a35c90a8b4bd393a65aa08ae9",
+  "status": "IDRID_EXTERNAL_CFP_EVALUATION_COMPLETE",
+  "thresholds_unchanged": true,
+  "used_temperature_scaling": false
+}

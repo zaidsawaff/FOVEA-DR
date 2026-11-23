@@ -1,0 +1,74 @@
+{
+  "IDRiD_used": false,
+  "calibration_images_used": false,
+  "candidate_sha256": "88303203fb3ca2a45da0aaa5c37540ef8a6d83dba78d2be98d21ca50fb12d9fa",
+  "guards": {
+    "CFP": {
+      "grade1_to2_not_increased": false,
+      "grade2_to1_reduced": true,
+      "large_errors_not_increased": true,
+      "qwk_not_decreased": true
+    },
+    "UWF": {
+      "grade1_to2_not_increased": false,
+      "grade2_to1_reduced": true,
+      "large_errors_not_increased": true,
+      "qwk_not_decreased": true
+    }
+  },
+  "interpretation": "Exploratory: architecture and checkpoint unchanged; validation motivated this pilot and is not an independent test.",
+  "locked_test_used": false,
+  "metrics": {
+    "CFP": {
+      "adapter": {
+        "errors_at_least_two_grades": 33,
+        "grade1_n": 156,
+        "grade1_to2": 42,
+        "grade2_n": 232,
+        "grade2_to1": 56,
+        "mae": 0.2115677321156773,
+        "n": 1314,
+        "qwk": 0.9093268948962361
+      },
+      "changed": 21,
+      "original": {
+        "errors_at_least_two_grades": 33,
+        "grade1_n": 156,
+        "grade1_to2": 37,
+        "grade2_n": 232,
+        "grade2_to1": 69,
+        "mae": 0.21841704718417046,
+        "n": 1314,
+        "qwk": 0.9064769412747496
+      }
+    },
+    "UWF": {
+      "adapter": {
+        "errors_at_least_two_grades": 14,
+        "grade1_n": 213,
+        "grade1_to2": 32,
+        "grade2_n": 242,
+        "grade2_to1": 41,
+        "mae": 0.2508561643835616,
+        "n": 1168,
+        "qwk": 0.9321349805916056
+      },
+      "changed": 24,
+      "original": {
+        "errors_at_least_two_grades": 16,
+        "grade1_n": 213,
+        "grade1_to2": 22,
+        "grade2_n": 242,
+        "grade2_to1": 52,
+        "mae": 0.2525684931506849,
+        "n": 1168,
+        "qwk": 0.9309725209899186
+      }
+    }
+  },
+  "original_checkpoint_changed": false,
+  "run_sha256": "20e12e29b4dc03e87956d8f6a7359b42a3851c8d1e10e85cb63333651db12727",
+  "status": "PILOT_GUARDS_NOT_MET",
+  "train_images": 512,
+  "validation_images": 2482
+}

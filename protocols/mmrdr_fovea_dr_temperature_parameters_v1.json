@@ -1,0 +1,116 @@
+{
+  "protocol": "FOVEA_DR_POST_SELECTION_TEMPERATURE_PARAMETERS_V1",
+  "status": "FITTED_ON_CALIBRATION_ONLY",
+  "execution_backend": "CPU_FLOAT32",
+  "run_signature": "6e5a0bdbea838b952a601dc6cda8407ab31637ede2ba7e184500db632d02c960",
+  "selected_checkpoint_sha256": "89f5e87b647680a9094c55bf647dc1dd2abb624681e733ffb453e30e4c11ff1f",
+  "calibration_protocol_sha256": "f569f63c9b9c44816f19ce5f49f724fc5b1e4dc202d6d4a8694250f7b33995e7",
+  "calibration_manifest_sha256": "f8e6a62b96e330a1b21bb9ed56897cbf04b730987cf9e0c31141927abbb84655",
+  "raw_predictions_sha256": "cf10c19b9f56b0512444015722857d756563b2c5f9fbf7388fd39f5ce8cefd03",
+  "grade_temperatures": {
+    "CFP": {
+      "temperature": 0.9536420352208999,
+      "optimizer_success": true,
+      "optimized_temperature": 0.9536420352208999,
+      "identity_nll": 0.466813682542338,
+      "optimized_nll": 0.4661789365691577,
+      "identity_fallback_used": false,
+      "rows": 1313
+    },
+    "UWF": {
+      "temperature": 1.117406972095587,
+      "optimizer_success": true,
+      "optimized_temperature": 1.117406972095587,
+      "identity_nll": 0.6600837567816549,
+      "optimized_nll": 0.6563473572091608,
+      "identity_fallback_used": false,
+      "rows": 1171
+    },
+    "OCT": {
+      "temperature": 2.9928638359337683,
+      "optimizer_success": true,
+      "optimized_temperature": 2.9928638359337683,
+      "identity_nll": 0.7793695407126642,
+      "optimized_nll": 0.4639415844675073,
+      "identity_fallback_used": false,
+      "rows": 356
+    }
+  },
+  "lesion_temperatures": {
+    "lesion_microaneurysm": {
+      "temperature": 0.795823363848937,
+      "optimizer_success": true,
+      "optimized_temperature": 0.795823363848937,
+      "identity_nll": 0.2550598930665884,
+      "optimized_nll": 0.2461941633823241,
+      "identity_fallback_used": false,
+      "valid_rows": 2484,
+      "positive_rows": 1301
+    },
+    "lesion_hard_exudate": {
+      "temperature": 0.9935373799022915,
+      "optimizer_success": true,
+      "optimized_temperature": 0.9935373799022915,
+      "identity_nll": 0.3492388047467279,
+      "optimized_nll": 0.3492326595579182,
+      "identity_fallback_used": false,
+      "valid_rows": 2484,
+      "positive_rows": 755
+    },
+    "lesion_intraretinal_hemorrhage": {
+      "temperature": 0.8746558690466607,
+      "optimizer_success": true,
+      "optimized_temperature": 0.8746558690466607,
+      "identity_nll": 0.29025360314476845,
+      "optimized_nll": 0.28792553454141706,
+      "identity_fallback_used": false,
+      "valid_rows": 2484,
+      "positive_rows": 759
+    },
+    "lesion_VB_IRMA": {
+      "temperature": 0.6684999037695875,
+      "optimizer_success": true,
+      "optimized_temperature": 0.6684999037695875,
+      "identity_nll": 0.2513718340109623,
+      "optimized_nll": 0.2385423007393189,
+      "identity_fallback_used": false,
+      "valid_rows": 2484,
+      "positive_rows": 149
+    },
+    "lesion_neovascularization": {
+      "temperature": 0.7496117327329637,
+      "optimizer_success": true,
+      "optimized_temperature": 0.7496117327329637,
+      "identity_nll": 0.16853865110098232,
+      "optimized_nll": 0.15982046561484156,
+      "identity_fallback_used": false,
+      "valid_rows": 2484,
+      "positive_rows": 187
+    },
+    "lesion_vitreous_hemorrhage": {
+      "temperature": 0.6258253817470574,
+      "optimizer_success": true,
+      "optimized_temperature": 0.6258253817470574,
+      "identity_nll": 0.14407769674085497,
+      "optimized_nll": 0.1241063062914886,
+      "identity_fallback_used": false,
+      "valid_rows": 2484,
+      "positive_rows": 194
+    },
+    "lesion_retinal_detachment": {
+      "temperature": 0.7386831501461474,
+      "optimizer_success": true,
+      "optimized_temperature": 0.7386831501461474,
+      "identity_nll": 0.1707890242446312,
+      "optimized_nll": 0.16055364202242084,
+      "identity_fallback_used": false,
+      "valid_rows": 2484,
+      "positive_rows": 34
+    }
+  },
+  "calibrated_predictions": "/content/drive/MyDrive/MMRDR_Q1_DR_Project/Runs/FOVEA_DR/calibration_seed2026_cpu_fp32/calibration_temperature_scaled_predictions.csv",
+  "calibrated_predictions_sha256": "9b0810953067fb6995d35f1fc63deefbdc847126330523bc07aaed0e4408c85c",
+  "metrics": "/content/drive/MyDrive/MMRDR_Q1_DR_Project/Audit/mmrdr_fovea_dr_CALIBRATION_metrics_before_after_temperature_v1.csv",
+  "metrics_sha256": "459b8188d1605016fb76b68e82d1b9f4dacd0dfa5612d5f0f3a9b3966ad554cf",
+  "locked_test_accessed": false
+}

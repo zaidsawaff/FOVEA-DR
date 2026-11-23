@@ -1,0 +1,214 @@
+{
+  "protocol_id": "MMRDR_FOVEA_DR_POSTHOC_COMPARISON_V1",
+  "stage": "0G-4D-5F-0",
+  "status": "FROZEN_BEFORE_COMPARATOR_TRAINING",
+  "classification": "POST_HOC_METHOD_COMPARISON_AFTER_PRIMARY_LOCKED_TEST_EVALUATION",
+  "scientific_positioning": {
+    "primary_FOVEA_DR_locked_test_result_remains_unchanged": true,
+    "comparison_was_not_preregistered_before_primary_test_access": true,
+    "comparison_must_be_reported_as_post_hoc": true,
+    "comparison_cannot_redefine_the_primary_endpoint": true,
+    "comparison_cannot_change_the_completed_FOVEA_DR_claim": true
+  },
+  "frozen_parent_artifacts": {
+    "candidate": {
+      "path": "/content/drive/MyDrive/MMRDR_Q1_DR_Project/Metadata/mmrdr_fovea_dr_algorithm_candidate_v1_1.json",
+      "sha256": "4e27eb48ae3118dfd9e7d657b3e4cb48fc7858c31c7467dd59d06b3178904181"
+    },
+    "development_split": {
+      "path": "/content/drive/MyDrive/MMRDR_Q1_DR_Project/Splits/mmrdr_development_split_v1_FROZEN.csv",
+      "sha256": "8263a3ade3317d1c77ceeadaee0df1c8d245bd30fa7d472c47d2e53914714140"
+    },
+    "training_protocol": {
+      "path": "/content/drive/MyDrive/MMRDR_Q1_DR_Project/Metadata/mmrdr_fovea_dr_training_protocol_v1.json",
+      "sha256": "5b16e0c8565b86d3cac603f416ee0b7f03055ab9a0eb9ac9e3fb007632329b40"
+    },
+    "production_source": {
+      "path": "/content/drive/MyDrive/MMRDR_Q1_DR_Project/Code/FOVEA_DR/v1_1/fovea_dr_training_v1.py",
+      "sha256": "228ce4ef9389d98a184d53f82c797f172907f27fa3a8702387eb5afc43be2cc9"
+    },
+    "final_result_evidence": {
+      "path": "/content/drive/MyDrive/MMRDR_Q1_DR_Project/Evidence/stage0g4d5e3b_locked_test_single_evaluation_results.json",
+      "sha256": "f458f949061a71dc80a51b02424058b4ab366531c1ed336dc01dab5bc82947ee"
+    }
+  },
+  "data_access_policy": {
+    "TRAIN": "ALLOWED_FOR_OPTIMIZATION",
+    "VALIDATION": "ALLOWED_FOR_EARLY_STOPPING_AND_MODEL_SELECTION",
+    "CALIBRATION": "ALLOWED_ONLY_AFTER_EPOCH_SELECTION_FOR_TEMPERATURE_SCALING",
+    "LOCKED_INTERNAL_TEST": "PROHIBITED_FOR_ALL_COMPARATOR_AND_ABLATION_EXECUTION",
+    "existing_FOVEA_DR_locked_test_aggregate_may_be_reported_unchanged": true,
+    "existing_locked_test_scoring_table_may_be_read_by_comparator_code": false,
+    "existing_locked_test_metric_table_may_be_used_for_model_choice": false
+  },
+  "fairness_controls": {
+    "development_split": "IDENTICAL_FROZEN_SPLIT",
+    "input": "512x512_RGB",
+    "normalization": "ImageNet_V1_mean_std",
+    "augmentation": "INHERIT_FROZEN_TRAINING_PROTOCOL_V1",
+    "sampling": "INHERIT_FROZEN_MODALITY_GRADE_SAMPLER",
+    "micro_batch": 16,
+    "gradient_accumulation": 2,
+    "effective_batch": 32,
+    "optimizer_scheduler_and_early_stopping": "INHERIT_FROZEN_TRAINING_PROTOCOL_V1",
+    "maximum_epochs": 30,
+    "early_stopping_patience": 6,
+    "run_seed": 2026,
+    "precision": "FLOAT16_AMP_ON_T4_OR_NUMERICALLY_EQUIVALENT_SUPPORTED_GPU",
+    "pretraining": "OFFICIAL_TORCHVISION_IMAGENET1K_V1_WHEN_AVAILABLE",
+    "pilot_checkpoint_initialization": false
+  },
+  "plain_multitask_head_contract": {
+    "fundus_grade_head": "5_CLASS_CFP_AND_UWF",
+    "OCT_head": "3_CLASS_DME",
+    "fundus_lesion_head": "7_INDEPENDENT_BINARY_LOGITS",
+    "clinical_reasoner": false,
+    "counterfactual_intervention_loss": false,
+    "clinical_state_alignment_loss": false,
+    "masked_route_agreement_loss": false,
+    "learned_reliability_gate": false,
+    "grade_CE_weight": 1.0,
+    "ordinal_EMD_weight": 0.5,
+    "lesion_BCE_weight": 0.5,
+    "OCT_DME_task_weight": 0.5
+  },
+  "comparators": [
+    {
+      "id": "B1_PLAIN_EFFICIENTNETV2S_MULTITASK",
+      "family": "BACKBONE_MATCHED_CONTROL",
+      "backbone": "EfficientNetV2-S",
+      "initialization": "official_torchvision_ImageNet1K_V1",
+      "purpose": "Isolate the contribution of FOVEA-DR structured clinical modules from the shared backbone."
+    },
+    {
+      "id": "B2_RESNET50_MULTITASK",
+      "family": "CONVENTIONAL_CNN_CONTROL",
+      "backbone": "ResNet-50",
+      "initialization": "official_torchvision_ImageNet1K_V2",
+      "purpose": "Conventional residual CNN baseline."
+    },
+    {
+      "id": "B3_CONVNEXT_TINY_MULTITASK",
+      "family": "MODERN_CNN_CONTROL",
+      "backbone": "ConvNeXt-Tiny",
+      "initialization": "official_torchvision_ImageNet1K_V1",
+      "purpose": "Modern convolutional architecture baseline."
+    }
+  ],
+  "ablations": [
+    {
+      "id": "A1_FOVEA_WITHOUT_COUNTERFACTUAL_LOSS",
+      "parent": "FOVEA_DR_V1_1",
+      "only_change": "lesion_counterfactual_intervention_weight=0.0"
+    },
+    {
+      "id": "A2_FOVEA_WITHOUT_CLINICAL_ALIGNMENT_AND_ROUTE_AGREEMENT",
+      "parent": "FOVEA_DR_V1_1",
+      "only_changes": [
+        "clinical_state_alignment_weight=0.0",
+        "masked_route_agreement_weight=0.0"
+      ]
+    },
+    {
+      "id": "A3_FOVEA_WITHOUT_LEARNED_RELIABILITY_GATE",
+      "parent": "FOVEA_DR_V1_1",
+      "only_change": "evidence_weight_fixed_to_1.0_for_all_routes_and_interventions"
+    }
+  ],
+  "selection_and_calibration": {
+    "epoch_selection_dataset": "VALIDATION",
+    "epoch_selection_primary_metric": "MEAN_OF_CFP_AND_UWF_QUADRATIC_WEIGHTED_KAPPA",
+    "epoch_selection_tie_breaker": "MEAN_CFP_UWF_NLL",
+    "early_stopping_patience": 6,
+    "temperature_fit_dataset": "CALIBRATION",
+    "temperature_units": "CFP_GRADE_UWF_GRADE_OCT_GRADE_AND_7_POOLED_FUNDUS_LESIONS",
+    "temperature_bounds": "INHERIT_FROZEN_CALIBRATION_PROTOCOL",
+    "decision_threshold_change_allowed": false,
+    "lesion_threshold": 0.5
+  },
+  "validation_comparison_endpoints": {
+    "primary": "UNWEIGHTED_MEAN_CFP_UWF_QWK",
+    "secondary": [
+      "CFP_QWK",
+      "UWF_QWK",
+      "MEAN_CFP_UWF_NLL",
+      "OCT_QWK",
+      "OCT_MACRO_F1",
+      "OCT_NLL"
+    ],
+    "grade_metrics": [
+      "NLL",
+      "Brier_score",
+      "ECE_15_EQUAL_WIDTH",
+      "accuracy",
+      "macro_F1",
+      "quadratic_weighted_kappa"
+    ],
+    "lesion_metrics": [
+      "binary_NLL",
+      "Brier_score",
+      "ECE_15_EQUAL_WIDTH",
+      "accuracy_at_0_5",
+      "F1_at_0_5"
+    ],
+    "lesion_units": [
+      "microaneurysm",
+      "hard_exudate",
+      "intraretinal_hemorrhage",
+      "VB_IRMA",
+      "neovascularization",
+      "vitreous_hemorrhage",
+      "retinal_detachment"
+    ]
+  },
+  "run_plan": {
+    "existing_reference": "FOVEA_DR_V1_1_SEED2026",
+    "new_comparator_runs": [
+      "B1_PLAIN_EFFICIENTNETV2S_MULTITASK",
+      "B2_RESNET50_MULTITASK",
+      "B3_CONVNEXT_TINY_MULTITASK"
+    ],
+    "new_ablation_runs": [
+      "A1_FOVEA_WITHOUT_COUNTERFACTUAL_LOSS",
+      "A2_FOVEA_WITHOUT_CLINICAL_ALIGNMENT_AND_ROUTE_AGREEMENT",
+      "A3_FOVEA_WITHOUT_LEARNED_RELIABILITY_GATE"
+    ],
+    "total_new_full_runs": 6,
+    "mandatory_preflight_steps_per_run": 64,
+    "execution_order": [
+      "B1_PLAIN_EFFICIENTNETV2S_MULTITASK",
+      "B2_RESNET50_MULTITASK",
+      "B3_CONVNEXT_TINY_MULTITASK",
+      "A1_FOVEA_WITHOUT_COUNTERFACTUAL_LOSS",
+      "A2_FOVEA_WITHOUT_CLINICAL_ALIGNMENT_AND_ROUTE_AGREEMENT",
+      "A3_FOVEA_WITHOUT_LEARNED_RELIABILITY_GATE"
+    ],
+    "stop_or_omit_rule": "NO_RUN_MAY_BE_OMITTED_BECAUSE_OF_UNFAVORABLE_VALIDATION_PERFORMANCE"
+  },
+  "reporting_policy": {
+    "report_all_six_frozen_runs": true,
+    "report_failures_and_resource_limits": true,
+    "single_seed_limitation_must_be_disclosed": true,
+    "no_significance_claim_from_overlapping_validation_runs": true,
+    "published_literature_comparison_must_separate_nonidentical_splits_or_metrics": true,
+    "existing_locked_test_result_reported_only_for_FOVEA_DR": true,
+    "new_models_receive_no_locked_test_score_under_this_protocol": true
+  },
+  "prohibitions": [
+    "NO_LOCKED_TEST_IMAGE_ACCESS",
+    "NO_LOCKED_TEST_LABEL_ACCESS",
+    "NO_LOCKED_TEST_PREDICTION_GENERATION_FOR_NEW_MODELS",
+    "NO_SECOND_LOCKED_TEST_SCIENTIFIC_EVALUATION",
+    "NO_CHANGE_TO_FOVEA_DR_FROZEN_RESULT",
+    "NO_COMPARATOR_OMISSION_AFTER_RESULTS",
+    "NO_HYPERPARAMETER_TUNING_UNIQUE_TO_A_SINGLE_COMPARATOR",
+    "NO_TEST_BASED_CLAIM_EXPANSION"
+  ],
+  "training_started_during_protocol_freeze": false,
+  "image_rows_loaded_during_protocol_freeze": false,
+  "locked_test_artifact_rows_read_during_protocol_freeze": false,
+  "protocol_freeze_source": {
+    "path": "/content/drive/MyDrive/MMRDR_Q1_DR_Project/Code/FOVEA_DR/v1_1/stage0g4d5f0_posthoc_comparison_protocol_freeze.py",
+    "sha256": "3fd23d88fc3dff05b550cce4b3f29510fbb803c0e15b9eb2a81c1fb3b4f876aa"
+  }
+}

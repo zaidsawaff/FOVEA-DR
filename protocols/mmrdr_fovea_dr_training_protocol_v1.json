@@ -1,0 +1,141 @@
+{
+  "protocol_id": "FOVEA_DR_TRAINING_PROTOCOL_V1",
+  "stage": "0G-4D-2B",
+  "status": "LOCKED_BEFORE_TRAINING",
+  "algorithm": "FOVEA-DR",
+  "candidate_version": "1.1",
+  "candidate_sha256": "4e27eb48ae3118dfd9e7d657b3e4cb48fc7858c31c7467dd59d06b3178904181",
+  "split_sha256": "8263a3ade3317d1c77ceeadaee0df1c8d245bd30fa7d472c47d2e53914714140",
+  "data_scope": {
+    "training_rows": 13251,
+    "allowed_for_optimization": "development_split == TRAIN",
+    "validation_policy": "Use frozen validation only after an epoch for checkpoint selection and early stopping.",
+    "calibration_policy": "Remain unused until model selection freeze.",
+    "locked_internal_test_policy": "Remain completely inaccessible until final freeze.",
+    "external_UWF_policy": "Remain inaccessible until final algorithm and calibration freeze."
+  },
+  "input": {
+    "size": [
+      512,
+      512
+    ],
+    "color": "RGB",
+    "normalization": "ImageNet1K_V1"
+  },
+  "augmentation": {
+    "fundus_CFP_UWF": {
+      "horizontal_flip_probability": 0.5,
+      "rotation_degrees": 10,
+      "brightness": 0.1,
+      "contrast": 0.1,
+      "saturation": 0.1,
+      "vertical_flip": false,
+      "random_crop": false,
+      "reason": "Preserve retinal field and peripheral evidence."
+    },
+    "OCT": {
+      "horizontal_flip_probability": 0.5,
+      "rotation_degrees": 5,
+      "brightness": 0.05,
+      "contrast": 0.05,
+      "vertical_flip": false,
+      "random_crop": false
+    }
+  },
+  "sampling": {
+    "micro_batch_size": 16,
+    "gradient_accumulation_steps": 2,
+    "effective_batch_size": 32,
+    "microbatch_A": {
+      "CFP": 8,
+      "UWF": 6,
+      "OCT": 2
+    },
+    "microbatch_B": {
+      "CFP": 7,
+      "UWF": 7,
+      "OCT": 2
+    },
+    "effective_batch_composition": {
+      "CFP": 15,
+      "UWF": 13,
+      "OCT": 4
+    },
+    "within_modality_grade_sampling": "inverse_square_root_class_frequency",
+    "sampling_with_replacement": true,
+    "microbatches_per_epoch": 830,
+    "optimizer_steps_per_epoch": 415,
+    "sampler_seed": 20260806,
+    "sampler_weights_csv": "/content/drive/MyDrive/MMRDR_Q1_DR_Project/Splits/mmrdr_fovea_dr_TRAIN_sampler_weights_v1.csv",
+    "sampler_weights_sha256": "6033e11f4981b763dbe73297525111b004c1d7f01f5a793994fdbc050f7fcb6d"
+  },
+  "lesion_loss": {
+    "type": "BCEWithLogitsLoss",
+    "positive_weight_rule": "sqrt(negative_count / positive_count)",
+    "positive_weights_csv": "/content/drive/MyDrive/MMRDR_Q1_DR_Project/Metadata/mmrdr_fovea_dr_lesion_pos_weights_v1.csv",
+    "positive_weights_sha256": "ae5fd5603ff548c1acf787d86777c5a0e96d046e1ed840fb5577842c65873eaa",
+    "mask": "lesion_loss_mask"
+  },
+  "loss_weights": {
+    "fundus_grade_cross_entropy_weight": 1.0,
+    "fundus_ordinal_EMD_weight": 0.5,
+    "lesion_BCE_weight": 0.5,
+    "clinical_state_alignment_weight": 0.2,
+    "lesion_counterfactual_intervention_weight": 0.1,
+    "masked_route_agreement_weight": 0.05,
+    "OCT_DME_task_weight": 0.5
+  },
+  "optimization": {
+    "optimizer": "AdamW",
+    "backbone_learning_rate": 0.0001,
+    "new_module_learning_rate": 0.0003,
+    "weight_decay": 0.0001,
+    "exclude_bias_and_normalization_from_weight_decay": true,
+    "gradient_clip_global_norm": 1.0,
+    "AMP": "float16",
+    "GradScaler": "dynamic",
+    "maximum_epochs": 30,
+    "total_optimizer_steps": 12450,
+    "warmup_steps": 623,
+    "warmup_fraction": 0.05,
+    "scheduler": "cosine_decay",
+    "minimum_learning_rate_ratio": 0.01,
+    "optimizer_step_only_after_complete_accumulation_cycle": true
+  },
+  "model_selection": {
+    "primary_validation_metric": "mean_CFP_UWF_QWK",
+    "metric_formula": "(CFP_QWK + UWF_QWK) / 2",
+    "tie_breaker": "lower_mean_CFP_UWF_NLL",
+    "early_stopping_patience_epochs": 6,
+    "early_stopping_minimum_delta": 0.002,
+    "OCT_DME_endpoint": "reported_secondary_not_primary_checkpoint_metric"
+  },
+  "reproducibility": {
+    "preflight_seed": 20260806,
+    "ablation_initial_seed": 20260806,
+    "final_model_seeds": [
+      2026,
+      2027,
+      2028
+    ],
+    "deterministic_split": true,
+    "resumable_epoch_checkpoints": true
+  },
+  "preflight_pilot": {
+    "optimizer_steps": 64,
+    "uses_TRAIN_only": true,
+    "validation_used": false,
+    "purpose": "Verify real optimization, loss finiteness, checkpoint resume, and short-horizon loss behavior."
+  },
+  "required_ablation_sequence": [
+    "E0_EfficientNetV2S_CE",
+    "E1_plus_ordinal",
+    "E2_plus_lesion_evidence_bank",
+    "E3_plus_FOV_coordinate_encoder",
+    "E4_plus_DCSR",
+    "E5_plus_LCI",
+    "E6_plus_reliability_gate",
+    "FOVEA_DR_FULL_FUNDUS",
+    "FOVEA_DR_FULL_plus_OCT_auxiliary"
+  ]
+}
